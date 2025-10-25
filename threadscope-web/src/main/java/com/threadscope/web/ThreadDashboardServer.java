@@ -81,10 +81,15 @@ public class ThreadDashboardServer {
         
         // API endpoints
         app.get("/api/threads", this::getThreads);
+        app.get("/api/threads/{id}", this::getThreadById);
+        app.get("/api/threads/async", this::getAsyncThreads);
+        app.get("/api/threads/state/{state}", this::getThreadsByState);
         app.get("/api/deadlocks", this::getDeadlocks);
         app.get("/api/config", this::getConfig);
         app.get("/api/status", this::getStatus);
         app.get("/api/async-stats", this::getAsyncStats);
+        app.get("/metrics", this::getMetrics);
+        app.post("/api/snapshot", this::triggerSnapshot);
         
         // Health check
         app.get("/health", ctx -> {
@@ -224,6 +229,182 @@ public class ThreadDashboardServer {
             
         } catch (Exception e) {
             logger.error("Error getting async stats", e);
+            ctx.status(500).json(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Returns information about a specific thread by ID.
+     */
+    private void getThreadById(Context ctx) {
+        try {
+            ThreadMonitor monitor = ThreadScopeBootstrap.getThreadMonitor();
+            if (monitor == null) {
+                ctx.status(503).json(Map.of("error", "ThreadScope not initialized"));
+                return;
+            }
+            
+            String idParam = ctx.pathParam("id");
+            long threadId;
+            try {
+                threadId = Long.parseLong(idParam);
+            } catch (NumberFormatException e) {
+                ctx.status(400).json(Map.of("error", "Invalid thread ID format"));
+                return;
+            }
+            
+            List<com.threadscope.ThreadInfo> threads = monitor.getAllThreads();
+            com.threadscope.ThreadInfo thread = threads.stream()
+                .filter(t -> t.getId() == threadId)
+                .findFirst()
+                .orElse(null);
+            
+            if (thread == null) {
+                ctx.status(404).json(Map.of("error", "Thread not found"));
+                return;
+            }
+            
+            ctx.json(Map.of("thread", thread));
+            
+        } catch (Exception e) {
+            logger.error("Error getting thread by ID", e);
+            ctx.status(500).json(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Returns only async threads.
+     */
+    private void getAsyncThreads(Context ctx) {
+        try {
+            ThreadMonitor monitor = ThreadScopeBootstrap.getThreadMonitor();
+            if (monitor == null) {
+                ctx.status(503).json(Map.of("error", "ThreadScope not initialized"));
+                return;
+            }
+            
+            List<com.threadscope.ThreadInfo> threads = monitor.getAllThreads();
+            List<com.threadscope.ThreadInfo> asyncThreads = threads.stream()
+                .filter(com.threadscope.ThreadInfo::isAsyncThread)
+                .collect(java.util.stream.Collectors.toList());
+            
+            ctx.json(Map.of("threads", asyncThreads, "count", asyncThreads.size()));
+            
+        } catch (Exception e) {
+            logger.error("Error getting async threads", e);
+            ctx.status(500).json(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Returns threads filtered by state.
+     */
+    private void getThreadsByState(Context ctx) {
+        try {
+            ThreadMonitor monitor = ThreadScopeBootstrap.getThreadMonitor();
+            if (monitor == null) {
+                ctx.status(503).json(Map.of("error", "ThreadScope not initialized"));
+                return;
+            }
+            
+            String stateParam = ctx.pathParam("state");
+            Thread.State targetState;
+            try {
+                targetState = Thread.State.valueOf(stateParam.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                ctx.status(400).json(Map.of("error", "Invalid thread state: " + stateParam));
+                return;
+            }
+            
+            List<com.threadscope.ThreadInfo> threads = monitor.getAllThreads();
+            List<com.threadscope.ThreadInfo> filteredThreads = threads.stream()
+                .filter(t -> t.getState().equals(targetState))
+                .collect(java.util.stream.Collectors.toList());
+            
+            ctx.json(Map.of("threads", filteredThreads, "count", filteredThreads.size(), "state", stateParam));
+            
+        } catch (Exception e) {
+            logger.error("Error getting threads by state", e);
+            ctx.status(500).json(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Returns performance metrics.
+     */
+    private void getMetrics(Context ctx) {
+        try {
+            ThreadMonitor monitor = ThreadScopeBootstrap.getThreadMonitor();
+            if (monitor == null) {
+                ctx.status(503).json(Map.of("error", "ThreadScope not initialized"));
+                return;
+            }
+            
+            List<com.threadscope.ThreadInfo> threads = monitor.getAllThreads();
+            
+            Map<String, Object> metrics = new HashMap<>();
+            metrics.put("timestamp", System.currentTimeMillis());
+            metrics.put("totalThreads", threads.size());
+            
+            // Thread state distribution
+            Map<String, Long> stateDistribution = threads.stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                    t -> t.getState().toString(),
+                    java.util.stream.Collectors.counting()
+                ));
+            metrics.put("stateDistribution", stateDistribution);
+            
+            // Async thread metrics
+            long asyncThreadCount = threads.stream()
+                .filter(com.threadscope.ThreadInfo::isAsyncThread)
+                .count();
+            metrics.put("asyncThreads", asyncThreadCount);
+            metrics.put("asyncThreadPercentage", threads.isEmpty() ? 0.0 : (double) asyncThreadCount / threads.size() * 100);
+            
+            // CPU time metrics
+            long totalCpuTime = threads.stream()
+                .mapToLong(com.threadscope.ThreadInfo::getCpuTime)
+                .sum();
+            metrics.put("totalCpuTime", totalCpuTime);
+            
+            // Memory metrics (if available)
+            Runtime runtime = Runtime.getRuntime();
+            metrics.put("memory", Map.of(
+                "totalMemory", runtime.totalMemory(),
+                "freeMemory", runtime.freeMemory(),
+                "maxMemory", runtime.maxMemory(),
+                "usedMemory", runtime.totalMemory() - runtime.freeMemory()
+            ));
+            
+            ctx.json(metrics);
+            
+        } catch (Exception e) {
+            logger.error("Error getting metrics", e);
+            ctx.status(500).json(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Triggers manual snapshot generation.
+     */
+    private void triggerSnapshot(Context ctx) {
+        try {
+            ThreadMonitor monitor = ThreadScopeBootstrap.getThreadMonitor();
+            if (monitor == null) {
+                ctx.status(503).json(Map.of("error", "ThreadScope not initialized"));
+                return;
+            }
+            
+            // Trigger snapshot generation
+            monitor.captureSnapshot();
+            
+            ctx.json(Map.of(
+                "message", "Snapshot triggered successfully",
+                "timestamp", System.currentTimeMillis()
+            ));
+            
+        } catch (Exception e) {
+            logger.error("Error triggering snapshot", e);
             ctx.status(500).json(Map.of("error", e.getMessage()));
         }
     }
