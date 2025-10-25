@@ -1,0 +1,126 @@
+{
+  "groups": [
+    {
+      "name": "threadscope",
+      "type": "com.threadscope.boot.ThreadScopeProperties",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties"
+    },
+    {
+      "name": "threadscope.advanced",
+      "type": "com.threadscope.boot.ThreadScopeProperties$AdvancedProperties",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties",
+      "sourceMethod": "getAdvanced()"
+    },
+    {
+      "name": "threadscope.alerts",
+      "type": "com.threadscope.boot.ThreadScopeProperties$AlertsProperties",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties",
+      "sourceMethod": "getAlerts()"
+    },
+    {
+      "name": "threadscope.dashboard",
+      "type": "com.threadscope.boot.ThreadScopeProperties$DashboardProperties",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties",
+      "sourceMethod": "getDashboard()"
+    },
+    {
+      "name": "threadscope.logging",
+      "type": "com.threadscope.boot.ThreadScopeProperties$LoggingProperties",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties",
+      "sourceMethod": "getLogging()"
+    },
+    {
+      "name": "threadscope.snapshot",
+      "type": "com.threadscope.boot.ThreadScopeProperties$SnapshotProperties",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties",
+      "sourceMethod": "getSnapshot()"
+    },
+    {
+      "name": "threadscope.snapshot.output",
+      "type": "com.threadscope.boot.ThreadScopeProperties$SnapshotProperties$OutputProperties",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties$SnapshotProperties",
+      "sourceMethod": "getOutput()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "threadscope.advanced.include-system-threads",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties$AdvancedProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "threadscope.advanced.max-stack-trace-depth",
+      "type": "java.lang.Integer",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties$AdvancedProperties",
+      "defaultValue": 20
+    },
+    {
+      "name": "threadscope.alerts.deadlock-detection",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties$AlertsProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "threadscope.alerts.hung-thread-threshold-ms",
+      "type": "java.lang.Long",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties$AlertsProperties",
+      "defaultValue": 15000
+    },
+    {
+      "name": "threadscope.dashboard.auto-open-browser",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties$DashboardProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "threadscope.dashboard.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties$DashboardProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "threadscope.dashboard.port",
+      "type": "java.lang.Integer",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties$DashboardProperties",
+      "defaultValue": 9090
+    },
+    {
+      "name": "threadscope.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "threadscope.logging.level",
+      "type": "java.lang.String",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties$LoggingProperties",
+      "defaultValue": "INFO"
+    },
+    {
+      "name": "threadscope.logging.output",
+      "type": "java.lang.String",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties$LoggingProperties",
+      "defaultValue": "console"
+    },
+    {
+      "name": "threadscope.snapshot.interval",
+      "type": "java.lang.String",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties$SnapshotProperties",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "threadscope.snapshot.output.directory",
+      "type": "java.lang.String",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties$SnapshotProperties$OutputProperties",
+      "defaultValue": ".\/thread-dumps"
+    },
+    {
+      "name": "threadscope.snapshot.output.format",
+      "type": "java.lang.String",
+      "sourceType": "com.threadscope.boot.ThreadScopeProperties$SnapshotProperties$OutputProperties",
+      "defaultValue": "html"
+    }
+  ],
+  "hints": []
+}

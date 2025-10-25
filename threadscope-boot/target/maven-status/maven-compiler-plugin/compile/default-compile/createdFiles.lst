@@ -1,0 +1,9 @@
+com\threadscope\boot\ThreadScopeAutoConfiguration.class
+com\threadscope\boot\ThreadScopeProperties$AdvancedProperties.class
+com\threadscope\boot\ThreadScopeProperties.class
+com\threadscope\boot\ThreadScopeProperties$LoggingProperties.class
+com\threadscope\boot\ThreadScopeProperties$SnapshotProperties$OutputProperties.class
+com\threadscope\boot\ThreadScopeProperties$SnapshotProperties.class
+com\threadscope\boot\ThreadScopeProperties$DashboardProperties.class
+META-INF\spring-configuration-metadata.json
+com\threadscope\boot\ThreadScopeProperties$AlertsProperties.class

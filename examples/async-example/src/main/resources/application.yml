@@ -1,0 +1,25 @@
+threadscope:
+  enabled: true
+  dashboard:
+    enabled: true
+    port: 9090
+    autoOpenBrowser: true
+  snapshot:
+    interval: 3s  # More frequent snapshots for async monitoring
+    output:
+      format: html
+      directory: ./thread-dumps
+  alerts:
+    deadlockDetection: true
+    hungThreadThresholdMs: 5000  # Shorter threshold for async operations
+  advanced:
+    includeSystemThreads: false
+    maxStackTraceDepth: 30  # Deeper stack traces for async chains
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.threadscope: DEBUG
+    reactor: DEBUG

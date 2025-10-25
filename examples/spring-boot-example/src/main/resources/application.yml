@@ -1,0 +1,21 @@
+threadscope:
+  enabled: true
+  dashboard:
+    enabled: true
+    port: 9090
+    autoOpenBrowser: true
+  snapshot:
+    interval: 5s
+    output:
+      format: html
+      directory: ./thread-dumps
+  alerts:
+    deadlockDetection: true
+    hungThreadThresholdMs: 10000
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.threadscope: DEBUG

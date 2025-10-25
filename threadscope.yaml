@@ -1,0 +1,20 @@
+threadscope:
+  enabled: true
+  snapshot:
+    interval: 10s
+    output:
+      format: html
+      directory: ./thread-dumps
+  dashboard:
+    enabled: true
+    port: 9090
+    autoOpenBrowser: false
+  alerts:
+    deadlockDetection: true
+    hungThreadThresholdMs: 15000
+  logging:
+    level: INFO
+    output: console
+  advanced:
+    includeSystemThreads: false
+    maxStackTraceDepth: 20
